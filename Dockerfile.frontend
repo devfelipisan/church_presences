@@ -1,0 +1,11 @@
+FROM node:lts-alpine
+
+WORKDIR /frontend
+
+RUN chown -R node:node /frontend
+
+COPY ./frontend .
+
+EXPOSE 3000
+
+CMD [ "yarn","dev" ]
