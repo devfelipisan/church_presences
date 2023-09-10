@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  database:
+    image: postgres:latest
+    container_name: database
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=database
+
+  backend:
+    container_name: backend-template
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: always
+    ports:
+      - 5000:5000
+    volumes:
+      - ./backend:/backend
+    environment:
+      NAME: BackEnd-Template
+      PORT: 5000
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/database?schema=public"
+      LOGGER: "debug,error,log,verbose,warn"
+      NODE_ENV: "development"
+    depends_on:
+      - database
+
+  frontend:
+    container_name: frontend-template
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/frontend
+    environment:
+      NAME: frontend
+      PORT: 3000
+      LOGGER: "debug,error,log,verbose,warn"
+      NODE_ENV: "development"
+    depends_on:
+      - backend
