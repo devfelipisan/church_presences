@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Install Node.js dependencies (common for both frontend and backend)
 RUN npm install -g npm@10.8.1 --force
+RUN apk add --no-cache docker-gen
 
 # Build and copy backend code
 COPY Dockerfile.backend ./
