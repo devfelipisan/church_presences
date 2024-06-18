@@ -1,26 +1,35 @@
-# Utilizando uma imagem base comum
-FROM node:lts-alpine
+# Primeiro estágio: Construção do backend
+FROM node:lts-alpine as backend-builder
 
-# Definindo o diretório de trabalho para o backend
 WORKDIR /backend
 
-# Copiando e instalando as dependências do backend
 COPY /backend/package*.json ./
 RUN apk update && apk add graphicsmagick ghostscript
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm install
 
-# Copiando o código-fonte do backend
 COPY /backend ./
+RUN npm run build
 
-# Definindo o diretório de trabalho para o frontend
+# Segundo estágio: Construção do frontend
+FROM node:lts-alpine as frontend-builder
+
 WORKDIR /frontend
 
-# Copiando e instalando as dependências do frontend
 COPY /frontend/package*.json ./
 RUN npm install
 
-# Copiando o código-fonte do frontend
 COPY /frontend ./
+RUN npm run build
+
+# Estágio final: Contêiner de produção
+FROM node:lts-alpine
+
+# Copiando o backend do estágio de construção
+COPY --from=backend-builder /backend /backend
+
+# Copiando o frontend do estágio de construção
+COPY --from=frontend-builder /frontend /frontend
 
 # Script de entrada para iniciar ambos os serviços
 COPY start.sh /start.sh
