@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install Node.js dependencies (common for both frontend and backend)
 RUN npm install -g npm@10.8.1 --force
-RUN apk update && apk add --no-cache https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/docker-gen-0.14.0-r1.apk
+RUN apk update && apk add --no-cache https://github.com/jwilder/docker-gen/releases/download/0.7.6/docker-gen-linux-amd64-0.7.6.tar.gz
 RUN apk update && apk add --no-cache docker-gen
 
 # Build and copy backend code
