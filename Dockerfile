@@ -10,15 +10,15 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Etapa Final: Combinação de Frontend e Backend (final)
+# Final Stage: Combine Frontend and Backend
 FROM node:lts-alpine AS final
 WORKDIR /app
 
-# Copia dos Artefatos Compilados do Frontend
+# Copy Frontend Build Artifacts
 COPY --from=frontend-builder /app/node_modules ./node_modules
 COPY ./frontend/dist .
 
-# Copia do Código do Backend
+# Copy Backend Code
 COPY ./backend .
 
 # Exposição da Porta do Backend
