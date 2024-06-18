@@ -30,11 +30,8 @@ RUN chown -R node:node /app
 # Escolha do Comando Backend ou Frontend com Base na Variável de Ambiente
 ENV ENVIRONMENT=backend
 
-CMD [
-    "sh", "-c",
-    "if [[ $ENVIRONMENT == 'backend' ]]; then \
-        yarn start:dev; \
-    else \
-        yarn serve; \
-    fi"
-]
+CMD ["sh", "-c", "if [[ $ENVIRONMENT == 'backend' ]]; then \
+  yarn start:dev; \
+else \
+  yarn serve; \
+fi"]
