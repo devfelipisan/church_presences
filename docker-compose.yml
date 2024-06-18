@@ -11,6 +11,12 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=database
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
 
   backend:
     container_name: backend-template
@@ -30,6 +36,12 @@ services:
       NODE_ENV: "development"
     depends_on:
       - database
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
 
   frontend:
     container_name: frontend-template
@@ -48,3 +60,9 @@ services:
       NODE_ENV: "development"
     depends_on:
       - backend
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
