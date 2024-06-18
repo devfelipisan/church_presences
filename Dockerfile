@@ -3,7 +3,7 @@ FROM node:lts-alpine AS base
 WORKDIR /app
 
 # Install Node.js dependencies (common for both frontend and backend)
-RUN npm install -g yarn
+RUN npm install -g npm@10.8.1 --force
 
 # Build and copy backend code
 COPY Dockerfile.backend ./
