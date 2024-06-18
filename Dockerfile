@@ -1,37 +1,34 @@
-FROM node:lts-alpine AS base
+# Utilizando uma imagem base comum
+FROM node:lts-alpine
 
-WORKDIR /app
+# Definindo o diretório de trabalho para o backend
+WORKDIR /backend
 
-# Install Node.js dependencies (common for both frontend and backend)
-RUN npm install -g npm@10.8.1 --force
-RUN apk update && apk add --no-cache https://github.com/jwilder/docker-gen/releases/download/0.7.6/docker-gen-linux-amd64-0.7.6.tar.gz
-RUN apk update && apk add --no-cache docker-gen
+# Copiando e instalando as dependências do backend
+COPY /backend/package*.json ./
+RUN apk update && apk add graphicsmagick ghostscript
+RUN npm install
 
-# Build and copy backend code
-COPY Dockerfile.backend ./
-RUN ["docker-gen", "yaml", "-o", "./backend/Dockerfile", "./backend/Dockerfile.template"]
-RUN yarn install --cwd backend
-COPY backend/ .
+# Copiando o código-fonte do backend
+COPY /backend ./
 
-# Build and copy frontend code
-COPY Dockerfile.frontend ./
-RUN ["docker-gen", "yaml", "-o", "./frontend/Dockerfile", "./frontend/Dockerfile.template"]
-RUN yarn install --cwd frontend
-COPY frontend/ .
+# Definindo o diretório de trabalho para o frontend
+WORKDIR /frontend
 
-# Define environment variables
-ENV NAME="My Application"
-ENV NODE_ENV=development
+# Copiando e instalando as dependências do frontend
+COPY /frontend/package*.json ./
+RUN npm install
 
-EXPOSE 5000 3000
+# Copiando o código-fonte do frontend
+COPY /frontend ./
 
-# Create separate services using multi-stage builds
-FROM base AS backend
-WORKDIR /app/backend
+# Script de entrada para iniciar ambos os serviços
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
-CMD ["yarn", "start:dev"]
+# Expondo as portas
+EXPOSE 3000
+EXPOSE 5000
 
-FROM base AS frontend
-WORKDIR /app/frontend
-
-CMD ["yarn", "dev"]
+# Comando para iniciar o script de entrada
+CMD ["/start.sh"]
