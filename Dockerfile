@@ -1,37 +1,35 @@
-# Etapa 1: Construção das Dependências do Backend (backend-builder)
-FROM node:lts-alpine AS backend-builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
+FROM node:lts-alpine AS base
 
-# Etapa 2: Construção das Dependências do Frontend (frontend-builder)
-FROM node:lts-alpine AS frontend-builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-
-# Final Stage: Combine Frontend and Backend
-FROM node:lts-alpine AS final
 WORKDIR /app
 
-# Copy Frontend Build Artifacts
-COPY --from=frontend-builder /app/node_modules ./node_modules
-COPY ./frontend/dist .
+# Install Node.js dependencies (common for both frontend and backend)
+RUN npm install -g yarn
 
-# Copy Backend Code
-COPY ./backend .
+# Build and copy backend code
+COPY Dockerfile.backend ./
+RUN ["docker-gen", "yaml", "-o", "./backend/Dockerfile", "./backend/Dockerfile.template"]
+RUN yarn install --cwd backend
+COPY backend/ .
 
-# Exposição da Porta do Backend
-EXPOSE 5000
+# Build and copy frontend code
+COPY Dockerfile.frontend ./
+RUN ["docker-gen", "yaml", "-o", "./frontend/Dockerfile", "./frontend/Dockerfile.template"]
+RUN yarn install --cwd frontend
+COPY frontend/ .
 
-# Definição do Usuário (opcional, depende dos requisitos do seu aplicativo)
-RUN chown -R node:node /app
+# Define environment variables
+ENV NAME="My Application"
+ENV NODE_ENV=development
 
-# Escolha do Comando Backend ou Frontend com Base na Variável de Ambiente
-ENV ENVIRONMENT=backend
+EXPOSE 5000 3000
 
-CMD ["sh", "-c", "if [[ $ENVIRONMENT == 'backend' ]]; then \
-  yarn start:dev; \
-else \
-  yarn serve; \
-fi"]
+# Create separate services using multi-stage builds
+FROM base AS backend
+WORKDIR /app/backend
+
+CMD ["yarn", "start:dev"]
+
+FROM base AS frontend
+WORKDIR /app/frontend
+
+CMD ["yarn", "dev"]
